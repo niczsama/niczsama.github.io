@@ -5,15 +5,71 @@
   
 
   
-  <title>Hexo</title>
+  <title>Docker | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/index.html">
+  <meta name="description" content="DockerDocker 概述Docker 是基于 Go 语言开发的开源项目！ 官网：https:&#x2F;&#x2F;www.docker.com&#x2F; 文档地址：https:&#x2F;&#x2F;docs.docker.com&#x2F; 仓库地址：https:&#x2F;&#x2F;hub.docker.com&#x2F; Docker 能干嘛 之前的虚拟机技术   虚拟机技术缺点：  资源占用十分多 冗余步骤多 启动很慢   容器化技术  &#x3D;&#x3D;容器化技术不是模拟的一个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker">
+<meta property="og:url" content="http://yoursite.com/2020/06/18/Docker/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="DockerDocker 概述Docker 是基于 Go 语言开发的开源项目！ 官网：https:&#x2F;&#x2F;www.docker.com&#x2F; 文档地址：https:&#x2F;&#x2F;docs.docker.com&#x2F; 仓库地址：https:&#x2F;&#x2F;hub.docker.com&#x2F; Docker 能干嘛 之前的虚拟机技术   虚拟机技术缺点：  资源占用十分多 冗余步骤多 启动很慢   容器化技术  &#x3D;&#x3D;容器化技术不是模拟的一个">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwi59d1rrj30ym0u0jsg.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwi5k0e2qj30yk0u0t9w.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwigog5oqj30p10d5aas.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwi80m2tlj30g00d80up.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwi85t6cvj31990u0qe7.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwi894loaj30wn0u0465.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwi8ggde1j30g00d80up.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwi8j6artj31aw0oodif.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwi8mfw9fj31640kygmy.jpg">
+<meta property="og:image" content="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1591881761120&di=252b6c62339dc618ded69cf1fffdc0ac&imgtype=0&src=http%253A%252F%252Fimg3.imgtn.bdimg.com%252Fit%252Fu%253D1473564113%252C4288905819%2526fm%253D214%2526gp%253D0.jpg">
+<meta property="og:image" content="https://images2015.cnblogs.com/blog/59618/201705/59618-20170519215116432-38667527.png">
+<meta property="og:image" content="https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=2826834715,3282873522&fm=15&gp=0.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwif57mcbj30g0060jsn.jpg">
+<meta property="og:image" content="http://c.biancheng.net/uploads/allimg/190416/4-1Z416164115364.gif">
+<meta property="og:image" content="http://c.biancheng.net/uploads/allimg/190416/4-1Z41616413R94.gif">
+<meta property="og:image" content="http://c.biancheng.net/uploads/allimg/190416/4-1Z416164203H1.gif">
+<meta property="og:image" content="http://c.biancheng.net/uploads/allimg/190416/4-1Z4161642301E.gif">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwiag5l00j31e20modhn.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwiajscz2j30s50ahq5q.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwiamzr9rj30vi0gu75h.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwias2qe1j30iu04vwev.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwiav0ppjj314a0p3n4g.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwiazj6omj30o509rgnq.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwib2c7xxj30t90htgqs.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwib5rev8j30bw046aa8.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwib82myrj30qd0bg40i.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwibb80loj30z20c8gm9.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwibe6pbfj30sv0doq6t.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwibfz0mwj30x90fbq6u.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwibhj3xwj30kt04wgmk.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwibmokpaj31cy0u0gtl.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwibnjk2wj31ag0u046i.jpg">
+<meta property="og:image" content="https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3288764101,1196462106&fm=11&gp=0.jpg">
+<meta property="og:image" content="https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3622110164,3202557425&fm=26&gp=0.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwibw26ywj31cv0u0wmb.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwibzg0irj30s007yjws.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwic2uoxyj30wa0lq17h.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwic61l20j31gy0nge71.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwicbkn4vj31vc0u0jwd.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwicfo8inj31tc06mt9t.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwiciyz21j31tc0603zk.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwicn7qiuj315f0u0tft.jpg">
+<meta property="og:image" content="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1592460101939&di=9e96bf2e563b941cb9bf92d9228e4045&imgtype=0&src=http%253A%252F%252Fwww.2cto.com%252Fuploadfile%252FCollfiles%252F20160712%252F20160712092130374.png">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwics766jj30q20eoaej.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwicv3t2ij30qh0glafj.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwicydkiij30kq0dbt96.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwid1i6a0j30ka0cowes.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwid87i7oj30k308m3ym.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwidazzf8j30vq032dgm.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwidd7rz9j30g308675b.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwidj0wsxj30gt06m756.jpg">
+<meta property="article:published_time" content="2020-06-18T08:15:23.995Z">
+<meta property="article:modified_time" content="2020-06-18T08:15:24.019Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1gfwi59d1rrj30ym0u0jsg.jpg">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -62,58 +118,7 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/06/19/hello-world/" class="article-date">
-  <time datetime="2020-06-19T09:53:12.222Z" itemprop="datePublished">2020-06-19</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/06/19/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/06/19/hello-world/" data-id="ckbm1cyyk000039xtfdqaf377" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Docker" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-Docker" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2020/06/18/Docker/" class="article-date">
   <time datetime="2020-06-18T08:15:23.995Z" itemprop="datePublished">2020-06-18</time>
@@ -126,8 +131,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/06/18/Docker/">Docker</a>
+    <h1 class="article-title" itemprop="name">
+      Docker
     </h1>
   
 
@@ -555,11 +560,23 @@
     </footer>
   </div>
   
-</article>
-
+    
+<nav id="article-nav">
+  
+    <a href="/2020/06/19/hello-world/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Hello World
+        
+      </div>
+    </a>
+  
+  
+</nav>
 
   
-
+</article>
 
 </section>
         
