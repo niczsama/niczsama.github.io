@@ -1,0 +1,678 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>分布式事务及解决方案 | o.0</title><meta name="author" content="NicZSAMA"><meta name="copyright" content="NicZSAMA"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="1.基础概念1.1.什么是事务什么是事务？举个生活中的例子：你去小卖铺买东西，“一手交钱，一手交货”就是一个事务的例子，交钱和交货必  须全部成功，事务才算成功，任一个活动失败，事务将撤销所有已成功的活动。  明白上述例子，再来看事务的定义：   事务可以看做是一次大的活动，它由不同的小活动组成，这些活动要么全部成功，要么全部失败。   1.2.本地事务在计算机系统中，更多的是通过关系型数据库来控">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式事务及解决方案">
+<meta property="og:url" content="http://gakkisama.com/2021/03/09/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/index.html">
+<meta property="og:site_name" content="o.0">
+<meta property="og:description" content="1.基础概念1.1.什么是事务什么是事务？举个生活中的例子：你去小卖铺买东西，“一手交钱，一手交货”就是一个事务的例子，交钱和交货必  须全部成功，事务才算成功，任一个活动失败，事务将撤销所有已成功的活动。  明白上述例子，再来看事务的定义：   事务可以看做是一次大的活动，它由不同的小活动组成，这些活动要么全部成功，要么全部失败。   1.2.本地事务在计算机系统中，更多的是通过关系型数据库来控">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328211839.png">
+<meta property="article:published_time" content="2021-03-09T04:55:29.576Z">
+<meta property="article:modified_time" content="2021-03-28T14:09:21.856Z">
+<meta property="article:author" content="NicZSAMA">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328211839.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://gakkisama.com/2021/03/09/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-03-28 22:09:21'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a></div></div></div><hr/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328211839.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">o.0</a></span><div id="menus"><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">分布式事务及解决方案</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-03-09T04:55:29.576Z" title="发表于 2021-03-09 12:55:29">2021-03-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-03-28T14:09:21.856Z" title="更新于 2021-03-28 22:09:21">2021-03-28</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="分布式事务及解决方案"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="1-基础概念"><a href="#1-基础概念" class="headerlink" title="1.基础概念"></a>1.<strong>基础概念</strong></h1><h2 id="1-1-什么是事务"><a href="#1-1-什么是事务" class="headerlink" title="1.1.什么是事务"></a>1.1.<strong>什么是事务</strong></h2><p>什么是事务？举个生活中的例子：你去小卖铺买东西，“一手交钱，一手交货”就是一个事务的例子，交钱和交货必 </p>
+<p>须全部成功，事务才算成功，任一个活动失败，事务将撤销所有已成功的活动。 </p>
+<p>明白上述例子，再来看事务的定义： </p>
+<blockquote>
+<p>事务可以看做是一次大的活动，它由不同的小活动组成，这些活动要么全部成功，要么全部失败。 </p>
+</blockquote>
+<h2 id="1-2-本地事务"><a href="#1-2-本地事务" class="headerlink" title="1.2.本地事务"></a>1.2.<strong>本地事务</strong></h2><p>在计算机系统中，更多的是通过关系型数据库来控制事务，这是利用数据库本身的事务特性来实现的，因此叫数据 </p>
+<p>库事务，由于应用主要靠关系数据库来控制事务，而数据库通常和应用在同一个服务器，所以基于关系型数据库的 </p>
+<p>事务又被称为本地事务。 </p>
+<p>回顾一下数据库事务的四大特性 ACID： </p>
+<ul>
+<li>A<strong>（Atomic）</strong>：原子性，构成事务的所有操作，要么都执行完成，要么全部不执行，不可能出现部分成功部分失 </li>
+</ul>
+<p>败的情况。 </p>
+<ul>
+<li>C<strong>（Consistency）</strong>：一致性，在事务执行前后，数据库的一致性约束没有被破坏。比如：张三向李四转100元， </li>
+</ul>
+<p>转账前和转账后的数据是正确状态这叫一致性，如果出现张三转出100元，李四账户没有增加100元这就出现了数 </p>
+<p>据错误，就没有达到一致性。 </p>
+<ul>
+<li>I<strong>（Isolation）</strong>：隔离性，数据库中的事务一般都是并发的，隔离性是指并发的两个事务的执行互不干扰，一个事 </li>
+</ul>
+<p>务不能看到其他事务运行过程的中间状态。通过配置事务隔离级别可以避脏读、重复读等问题。 </p>
+<ul>
+<li>D<strong>（Durability）</strong>：持久性，事务完成之后，该事务对数据的更改会被持久化到数据库，且不会被回滚。 </li>
+</ul>
+<p>数据库事务在实现时会将一次事务涉及的所有操作全部纳入到一个不可分割的执行单元，该执行单元中的所有操作 </p>
+<p>要么都成功，要么都失败，只要其中任一操作执行失败，都将导致整个事务的回滚 </p>
+<h2 id="1-3-分布式事务"><a href="#1-3-分布式事务" class="headerlink" title="1.3.分布式事务"></a>1.3.<strong>分布式事务</strong></h2><p>随着互联网的快速发展，软件系统由原来的单体应用转变为分布式应用，下图描述了单体应用向微服务的演变</p>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210309130809.png" alt="image-20210309130734033"></p>
+<p>分布式系统会把一个应用系统拆分为可独立部署的多个服务，因此需要服务与服务之间远程协作才能完成事务操 </p>
+<p>作，这种分布式系统环境下由不同的服务之间通过网络远程协作完成事务称之为<strong>分布式事务</strong>，例如用户注册送积分 </p>
+<p>事务、创建订单减库存事务，银行转账事务等都是分布式事务。 </p>
+<p>我们知道本地事务依赖数据库本身提供的事务特性来实现，因此以下逻辑可以控制本地事务： </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">begin transaction； </span><br><span class="line"></span><br><span class="line"><span class="comment">//1.本地数据库操作：张三减少金额 </span></span><br><span class="line"></span><br><span class="line"><span class="comment">//2.本地数据库操作：李四增加金额 </span></span><br><span class="line"></span><br><span class="line">commit transation; </span><br></pre></td></tr></table></figure>
+
+<p>但是在分布式环境下，会变成下边这样： </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">begin transaction； </span><br><span class="line"></span><br><span class="line"><span class="comment">//1.本地数据库操作：张三减少金额 </span></span><br><span class="line"></span><br><span class="line"><span class="comment">//2.远程调用：让李四增加金额 </span></span><br><span class="line"></span><br><span class="line">commit transation; </span><br></pre></td></tr></table></figure>
+
+<p>可以设想，当远程调用让李四增加金额成功了，由于网络问题远程调用并没有返回，此时本地事务提交失败就回滚 </p>
+<p>了张三减少金额的操作，此时张三和李四的数据就不一致了。 </p>
+<p>因此在分布式架构的基础上，传统数据库事务就无法使用了，张三和李四的账户不在一个数据库中甚至不在一个应 </p>
+<p>用系统里，实现转账事务需要通过远程调用，由于网络问题就会导致分布式事务问题。 </p>
+<h2 id="1-4-分布式事务产生的场景"><a href="#1-4-分布式事务产生的场景" class="headerlink" title="1.4 分布式事务产生的场景"></a><strong>1.4</strong> <strong>分布式事务产生的场景</strong></h2><ol>
+<li>典型的场景就是微服务架构 微服务之间通过远程调用完成事务操作。 比如：订单微服务和库存微服务，下单的 </li>
+</ol>
+<p>同时订单微服务请求库存微服务减库存。 简言之：跨JVM进程产生分布式事务。</p>
+<img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210309131015.png" alt="image-20210309131015742" style="zoom:50%;" />
+
+<ol start="2">
+<li>单体系统访问多个数据库实例 当单体系统需要访问多个数据库（实例）时就会产生分布式事务。 比如：用户信 </li>
+</ol>
+<p>息和订单信息分别在两个MySQL实例存储，用户管理系统删除用户信息，需要分别删除用户信息及用户的订单信 </p>
+<p>息，由于数据分布在不同的数据实例，需要通过不同的数据库链接去操作数据，此时产生分布式事务。 简言之：跨 </p>
+<p>数据库实例产生分布式事务。</p>
+<img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210309131133.png" alt="image-20210309131133002" style="zoom:50%;" />
+
+<p>3、多服务访问同一个数据库实例 比如：订单微服务和库存微服务即使访问同一个数据库也会产生分布式事务，原 </p>
+<p>因就是跨JVM进程，两个微服务持有了不同的数据库链接进行数据库操作，此时产生分布式事务。</p>
+<img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210309131201.png" alt="image-20210309131201678" style="zoom:50%;" />
+
+<h1 id="2-分布式事务基础理论"><a href="#2-分布式事务基础理论" class="headerlink" title="2.分布式事务基础理论"></a>2.<strong>分布式事务基础理论</strong></h1><p>通过前面的介绍，我们了解到了分布式事务的基础概念。与本地事务不同的是，分布式系统之所以叫分布式，是因为提供服务的各个节点分布在不同机器上，相互之间通过网络交互。不能因为有一点网络问题就导致整个系统无法提供服务，网络因素成为了分布式事务的考量标准之一。因此，分布式事务需要更进一步的理论支持，接下来，我们先引入分布式事务的CAP理论。在讲解分布式事务控制解决方案之前需要先学习一些基础理论，通过理论知识指导我们确定分布式事务控制的目标，从而帮助我们理解每个解决方案。 </p>
+<h2 id="2-1-CAP理论"><a href="#2-1-CAP理论" class="headerlink" title="2.1.CAP理论"></a>2.1.CAP<strong>理论</strong></h2><h3 id="2-1-1-理解CAP"><a href="#2-1-1-理解CAP" class="headerlink" title="2.1.1.理解CAP"></a>2.1.1.<strong>理解CAP</strong></h3><p>CAP是 Consistency、Availability、Partition tolerance三个词语的缩写，分别表示一致性、可用性、分区容忍 </p>
+<p>性。</p>
+<p>下边我们分别来解释： </p>
+<p>为了方便对CAP理论的理解，我们结合业务场景来理解CAP。 </p>
+<p>如下图，是商品信息管理的执行流程： </p>
+<img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210309131923.png" alt="image-20210309131923894" style="zoom:50%;" />
+
+<p>整体执行流程如下： </p>
+<ol>
+<li><p>商品服务请求主数据库写入商品信息（添加商品、修改商品、删除商品） </p>
+</li>
+<li><p>主数据库向商品服务响应写入成功。 </p>
+</li>
+<li><p>商品服务请求从数据库读取商品信息。 </p>
+</li>
+</ol>
+<h4 id="C-Consistency："><a href="#C-Consistency：" class="headerlink" title="C - Consistency："></a>C - Consistency：</h4><p>一致性是指写操作后的读操作可以读取到最新的数据状态，当数据分布在多个节点上，从任意结点读取到的数据都是最新的状态。 </p>
+<p>上图中，商品信息的读写要满足一致性就是要实现如下目标： </p>
+<ol>
+<li><p>商品服务写入主数据库成功，则向从数据库查询新数据也成功。 </p>
+</li>
+<li><p>商品服务写入主数据库失败，则向从数据库查询新数据也失败。 </p>
+</li>
+</ol>
+<blockquote>
+<p>如何实现一致性？ </p>
+</blockquote>
+<ol>
+<li><p>写入主数据库后要将数据同步到从数据库。 </p>
+</li>
+<li><p>写入主数据库后，在向从数据库同步期间要将从数据库锁定，待同步完成后再释放锁，以免在新数据写入成功后，向从数据库查询到旧的数据。分布式系统一致性的特点： </p>
+</li>
+<li><p>由于存在数据同步的过程，写操作的响应会有一定的延迟。 </p>
+</li>
+<li><p>为了保证数据一致性会对资源暂时锁定，待数据同步完成释放锁定资源。 </p>
+</li>
+<li><p>如果请求数据同步失败的结点则会返回错误信息，一定不会返回旧数据。 </p>
+</li>
+</ol>
+<h4 id="A-Availability-："><a href="#A-Availability-：" class="headerlink" title="A - Availability ："></a>A - Availability ：</h4><p>可用性是指任何事务操作都可以得到响应结果，且不会出现响应超时或响应错误。 </p>
+<p>上图中，商品信息读取满足可用性就是要实现如下目标： </p>
+<ol>
+<li><p>从数据库接收到数据查询的请求则立即能够响应数据查询结果。 </p>
+</li>
+<li><p>从数据库不允许出现响应超时或响应错误。 </p>
+</li>
+</ol>
+<blockquote>
+<p>如何实现可用性？ </p>
+</blockquote>
+<ol>
+<li><p>写入主数据库后要将数据同步到从数据库。 </p>
+</li>
+<li><p>由于要保证从数据库的可用性，不可将从数据库中的资源进行锁定。 </p>
+</li>
+<li><p>即时数据还没有同步过来，从数据库也要返回要查询的数据，哪怕是旧数据，如果连旧数据也没有则可以按照 约定返回一个默认信息，但不能返回错误或响应超时。 </p>
+</li>
+</ol>
+<blockquote>
+<p>分布式系统可用性的特点：所有请求都有响应，且不会出现响应超时或响应错误。 </p>
+</blockquote>
+<h4 id="P-Partition-tolerance-："><a href="#P-Partition-tolerance-：" class="headerlink" title="P - Partition tolerance ："></a>P - Partition tolerance ：</h4><p>通常分布式系统的各个结点部署在不同的子网，这就是网络分区，不可避免的会出现由于网络问题而导致结点之间通信失败，此时仍可对外提供服务，这叫分区容忍性。 </p>
+<p>上图中，商品信息读写满足分区容忍性就是要实现如下目标： </p>
+<ol>
+<li><p>主数据库向从数据库同步数据失败不影响读写操作。 </p>
+</li>
+<li><p>其一个结点挂掉不影响另一个结点对外提供服务。 </p>
+</li>
+</ol>
+<blockquote>
+<p>如何实现分区容忍性？ </p>
+</blockquote>
+<ol>
+<li><p>尽量使用异步取代同步操作，例如使用异步方式将数据从主数据库同步到从数据，这样结点之间能有效的实现松耦合。 </p>
+</li>
+<li><p>添加从数据库结点，其中一个从结点挂掉其它从结点提供服务。分布式分区容忍性的特点： </p>
+</li>
+</ol>
+<blockquote>
+<p>分区容忍性分是布式系统具备的基本能力。 </p>
+</blockquote>
+<h3 id="2-1-2-CAP组合方式"><a href="#2-1-2-CAP组合方式" class="headerlink" title="2.1.2.CAP组合方式"></a>2.1.2.CAP<strong>组合方式</strong></h3><h4 id="同时具备-CAP？"><a href="#同时具备-CAP？" class="headerlink" title="同时具备 CAP？"></a>同时具备 CAP？</h4><p>在所有分布式事务场景中不会同时具备<strong>CAP三个特性，因为在具备了P的前提下C和A是不能共存的。</strong> </p>
+<p>比如： </p>
+<p>下图满足了P即表示实现分区容忍： </p>
+<img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210309132423.png" alt="image-20210309132423285" style="zoom:50%;" />
+
+<p>本图分区容忍的含义是： </p>
+<ol>
+<li><p>主数据库通过网络向从数据同步数据，可以认为主从数据库部署在不同的分区，通过网络进行交互。 </p>
+</li>
+<li><p>当主数据库和从数据库之间的网络出现问题不影响主数据库和从数据库对外提供服务。 </p>
+</li>
+<li><p>其一个结点挂掉不影响另一个结点对外提供服务。 </p>
+</li>
+</ol>
+<p>如果要实现C则必须保证数据一致性，在数据同步的时候为防止向从数据库查询不一致的数据则需要将从数据库数据锁定，待同步完成后解锁，如果同步失败从数据库要返回错误信息或超时信息。 </p>
+<p>如果要实现A则必须保证数据可用性，不管任何时候都可以向从数据查询数据，则不会响应超时或返回错误信息。通过分析发现在满足P的前提下C和A存在矛盾性。 </p>
+<h4 id="CAP的组合方式"><a href="#CAP的组合方式" class="headerlink" title="CAP的组合方式"></a>CAP的组合方式</h4><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328173626.png" alt="img" style="zoom:50%;" />
+
+<p>所以在生产中对分布式事务处理时要根据需求来确定满足 CAP 的哪两个方面。 </p>
+<ul>
+<li><p>AP：放弃一致性，追求分区容忍性和可用性。这是很多分布式系统设计时的选择。 例如：</p>
+<p>上边的商品管理，完全可以实现AP，前提是只要用户可以接受所查询的到数据在一定时间内不是最新的即可。通常实现AP都会保证最终一致性，后面讲的BASE理论就是根据AP来扩展的，一些业务场景 比如：订单退款，今日退款成功，明日账户到账，只要用户可以接受在一定时间内到账即可。 </p>
+</li>
+<li><p>CP：放弃可用性，追求一致性和分区容错性，我们的zookeeper其实就是追求的强一致，又比如跨行转账，一次转账请求要等待双方银行系统都完成整个事务才算完成。</p>
+</li>
+<li><p>CA：放弃分区容忍性，即不进行分区，不考虑由于网络不通或结点挂掉的问题，则可以实现一致性和可用性。那么系统将不是一个标准的分布式系统，我们最常用的关系型数据就满足了CA。 </p>
+</li>
+</ul>
+<p>上边的商品管理，如果要实现CA则架构如下： </p>
+<p>主数据库和从数据库中间不再进行数据同步，数据库可以响应每次的查询请求，通过事务隔离级别实现每个查询请求都可以返回最新的数据。 </p>
+<h3 id="2-1-3-CAP-在实际应用中"><a href="#2-1-3-CAP-在实际应用中" class="headerlink" title="2.1.3 CAP 在实际应用中"></a>2.1.3 CAP 在实际应用中</h3><ol>
+<li>注册中心，选择 CP 还是 AP？</li>
+<li>分布式锁，选择 CP 还是 AP？</li>
+<li>分布式事务，选择 CP 还是 AP？</li>
+</ol>
+<h4 id="2-1-3-1-注册中心，选择-CP-还是-AP？"><a href="#2-1-3-1-注册中心，选择-CP-还是-AP？" class="headerlink" title="2.1.3.1 注册中心，选择 CP 还是 AP？"></a>2.1.3.1 注册中心，选择 CP 还是 AP？</h4><p>在讨论 CAP 之前先明确下服务注册中心主要是解决什么问题：</p>
+<ul>
+<li>服务注册：实例将自身服务信息注册到注册中心，这部分信息包括服务的主机 IP 和服务的 Port，以及暴露服务自身状态和访问协议信息等。</li>
+<li>服务发现：实例请求注册中心所依赖的服务信息，服务实例通过注册中心，获取到注册到其中的服务实例的信息，通过这些信息去请求它们提供的服务。</li>
+</ul>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328180416.png" alt="img"></p>
+<p><strong>Zookeeper 选择 CP</strong></p>
+<p>Zookeeper 保证 CP，即任何时刻对 Zookeeper 的访问请求能得到一致性的数据结果，同时系统对网络分割具备容错性，但是它不能保证每次服务的可用性。</p>
+<p>从实际情况来分析，在使用 Zookeeper 获取服务列表时，如果 ZK 正在选举或者 ZK 集群中半数以上的机器不可用，那么将无法获取数据。所以说，ZK 不能保证服务可用性。</p>
+<p><strong>Eureka 选择 AP</strong></p>
+<p>Eureka 保证 AP，Eureka 在设计时优先保证可用性，每一个节点都是平等的。</p>
+<p>一部分节点挂掉不会影响到正常节点的工作，不会出现类似 ZK 的选举 Leader 的过程，客户端发现向某个节点注册或连接失败，会自动切换到其他的节点。</p>
+<p>只要有一台 Eureka 存在，就可以保证整个服务处在可用状态，只不过有可能这个服务上的信息并不是最新的信息。</p>
+<blockquote>
+<p><strong>ZK 和 Eureka 的数据一致性问题</strong></p>
+</blockquote>
+<p>先要明确一点，Eureka 的创建初心就是为一个注册中心，但是 ZK 更多是作为分布式协调服务的存在。</p>
+<p>只不过因为它的特性被 Dubbo 赋予了注册中心，它的职责更多是保证数据(配置数据，状态数据)在管辖下的所有服务之间保持一致。</p>
+<p>所以这个就不难理解为何 ZK 被设计成 CP 而不是 AP，ZK 最核心的算法 ZAB，就是为了解决分布式系统下数据在多个服务之间一致同步的问题。</p>
+<p>更深层的原因，ZK 是按照 CP 原则构建，也就是说它必须保持每一个节点的数据都保持一致。</p>
+<p>如果 ZK 下节点断开或者集群中出现网络分割(例如交换机的子网间不能互访)，那么 ZK 会将它们从自己的管理范围中剔除，外界不能访问这些节点，即使这些节点是健康的可以提供正常的服务，所以导致这些节点请求都会丢失。</p>
+<p>而 Eureka 则完全没有这方面的顾虑，它的节点都是相对独立，不需要考虑数据一致性的问题，这个应该是 Eureka 的诞生就是为了注册中心而设计。</p>
+<p>相对 ZK 来说剔除了 Leader 节点选取和事务日志机制，这样更有利于维护和保证 Eureka 在运行的健壮性。</p>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328180636.png" alt="img"></p>
+<p>再来看看，数据不一致性在注册服务中会给 Eureka 带来什么问题，无非就是某一个节点被注册的服务多，某个节点注册的服务少，在某一个瞬间可能导致某些 IP 节点被调用数多，某些 IP 节点调用数少的问题。</p>
+<p>也有可能存在一些本应该被删除而没被删除的脏数据。</p>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328180636.png" alt="img"></p>
+<p><strong>服务注册应该选择 AP 还是 CP</strong></p>
+<p>对于服务注册来说，针对同一个服务，即使注册中心的不同节点保存的服务注册信息不相同，也并不会造成灾难性的后果。</p>
+<p>对于服务消费者来说，能消费才是最重要的，就算拿到的数据不是最新的数据，消费者本身也可以进行尝试失败重试。总比为了追求数据的一致性而获取不到实例信息整个服务不可用要好。</p>
+<p>所以，对于服务注册来说，可用性比数据一致性更加的重要，选择 AP。</p>
+<h4 id="2-1-3-2-分布式锁，是选择-CA-还是选择-CP"><a href="#2-1-3-2-分布式锁，是选择-CA-还是选择-CP" class="headerlink" title="2.1.3.2 分布式锁，是选择 CA 还是选择 CP?"></a>2.1.3.2 分布式锁，是选择 CA 还是选择 CP?</h4><p>这里实现分布式锁的方式选取了三种：</p>
+<ul>
+<li><strong>基于数据库实现分布式锁</strong></li>
+<li><strong>基于 Redis 实现分布式锁</strong></li>
+<li><strong>基于 Zookeeper 实现分布式锁</strong></li>
+</ul>
+<p><strong>基于数据库实现分布式锁</strong></p>
+<p>构建表结构：</p>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328181733.png"></p>
+<p>利用表的 UNIQUE KEY idx_lock(method_lock)作为唯一主键，当进行上锁时进行 Insert 动作，数据库成功录入则以为上锁成功，当数据库报出 Duplicate entry 则表示无法获取该锁。</p>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328181606.png" alt="img"></p>
+<p>不过这种方式对于单主却无法自动切换主从的 MySQL 来说，基本就无法实现 P 分区容错性(MySQL 自动主从切换在目前并没有十分完美的解决方案)。</p>
+<p>可以说这种方式强依赖于数据库的可用性，数据库写操作是一个单点，一旦数据库挂掉，就导致锁的不可用。这种方式基本不在 CAP 的一个讨论范围。</p>
+<p><strong>基于 Redis 实现分布式锁</strong></p>
+<p>Redis 单线程串行处理天然就是解决串行化问题，用来解决分布式锁是再适合不过。</p>
+<p>实现方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setnx key value Expire_time 获取到锁 返回 1 ， 获取失败 返回 0 </span><br></pre></td></tr></table></figure>
+
+<p>为了解决数据库锁的无主从切换的问题，可以选择 Redis 集群，或者是 Sentinel 哨兵模式，实现主从故障转移，当 Master 节点出现故障，哨兵会从 Slave 中选取节点，重新变成新的 Master 节点。</p>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328181607.jpg" alt="img"></p>
+<p>哨兵模式故障转移是由 Sentinel 集群进行监控判断，当 Maser 出现异常即复制中止，重新推选新 Slave 成为 Master，Sentinel 在重新进行选举并不在意主从数据是否复制完毕具备一致性。</p>
+<p>所以 Redis 的复制模式是属于 AP 的模式。保证可用性，在主从复制中“主”有数据，但是可能“从”还没有数据。</p>
+<p>这个时候，一旦主挂掉或者网络抖动等各种原因，可能会切换到“从”节点，这个时候可能会导致两个业务线程同时获取得两把锁。</p>
+<p><img src="https://s3.51cto.com/oss/201909/05/b595daebf582c8a9b0d41d25f29bff48.png" alt="img"></p>
+<p>这个过程如下：</p>
+<ul>
+<li>业务线程 -1 向主节点请求锁</li>
+<li>业务线程 -1 获取锁</li>
+<li>业务线程 -1 获取到锁并开始执行业务</li>
+<li>这个时候 Redis 刚生成的锁在主从之间还未进行同步</li>
+<li>Redis 这时候主节点挂掉了</li>
+<li>Redis 的从节点升级为主节点</li>
+<li>业务线程 -2 想新的主节点请求锁</li>
+<li>业务线程 -2 获取到新的主节点返回的锁</li>
+<li>业务线程 -2 获取到锁开始执行业务</li>
+<li>这个时候业务线程 -1 和业务线程 -2 同时在执行任务</li>
+</ul>
+<p>上述的问题其实并不是 Redis 的缺陷，只是 Redis 采用了 AP 模型，它本身无法确保我们对一致性的要求。</p>
+<p>Redis 官方推荐 Redlock 算法来保证，问题是 Redlock 至少需要三个 Redis 主从实例来实现，维护成本比较高。</p>
+<p>相当于 Redlock 使用三个 Redis 集群实现了自己的另一套一致性算法，比较繁琐，在业界也使用得比较少。</p>
+<p>能不能使用 Redis 作为分布式锁?这个本身就不是 Redis 的问题，还是取决于业务场景。</p>
+<p>我们先要自己确认我们的场景是适合 AP 还是 CP ， 如果在社交发帖等场景下，我们并没有非常强的事务一致性问题，Redis 提供给我们高性能的 AP 模型是非常适合的。</p>
+<p>但如果是交易类型，对数据一致性非常敏感的场景，我们可能要寻找一种更加适合的 CP 模型。</p>
+<p><strong>基于 Zookeeper 实现分布式锁</strong></p>
+<p>刚刚也分析过，Redis 其实无法确保数据的一致性，先来看 Zookeeper 是否适合作为我们需要的分布式锁。</p>
+<p>首先 ZK 的模式是 CP 模型，也就是说，当 ZK 锁提供给我们进行访问的时候，在 ZK 集群中能确保这把锁在 ZK 的每一个节点都存在。</p>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328181912.png"></p>
+<p>这个实际上是 ZK 的 Leader 通过二阶段提交写请求来保证的，这个也是 ZK 的集群规模大了的一个瓶颈点。</p>
+<p><strong>①ZK 锁实现的原理</strong></p>
+<p>说 ZK 的锁问题之前先看看 Zookeeper 中几个特性，这几个特性构建了 ZK 的一把分布式锁。</p>
+<p>ZK 的特性如下：</p>
+<ul>
+<li>有序节点：当在一个父目录下如 /lock 下创建 有序节点，节点会按照严格的先后顺序创建出自节点 lock000001，lock000002，lock0000003，以此类推，有序节点能严格保证各个自节点按照排序命名生成。</li>
+<li>临时节点：客户端建立了一个临时节点，在客户端的会话结束或会话超时，Zookepper 会自动删除该节点 ID。</li>
+<li>事件监听：在读取数据时，我们可以对节点设置监听，当节点的数据发生变化(1 节点创建 2 节点删除 3 节点数据变成 4 自节点变成)时，Zookeeper 会通知客户端。</li>
+</ul>
+<p><img src="https://s5.51cto.com/oss/201909/05/86e9183145e3e576c444dc8b21f0ce94.png" alt="img"></p>
+<p>结合这几个特点，来看下 ZK 是怎么组合分布式锁：</p>
+<ul>
+<li>业务线程 -1，业务线程 -2 分别向 ZK 的 /lock 目录下，申请创建有序的临时节点。</li>
+<li>业务线程 -1 抢到 /lock0001 的文件，也就是在整个目录下最小序的节点，也就是线程 -1 获取到了锁。</li>
+<li>业务线程 -2 只能抢到 /lock0002 的文件，并不是最小序的节点，线程 2 未能获取锁。</li>
+<li>业务线程 -1 与 lock0001 建立了连接，并维持了心跳，维持的心跳也就是这把锁的租期。</li>
+<li>当业务线程 -1 完成了业务，将释放掉与 ZK 的连接，也就是释放了这把锁。</li>
+</ul>
+<p><strong>②ZK 分布式锁的代码实现</strong></p>
+<p>ZK 官方提供的客户端并不支持分布式锁的直接实现，我们需要自己写代码去利用 ZK 的这几个特性去进行实现。</p>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328182104.png"></p>
+<p><strong>究竟该用 CP 还是 AP 的分布式锁</strong></p>
+<p>首先得了解清楚我们使用分布式锁的场景，为何使用分布式锁，用它来帮我们解决什么问题，先聊场景后聊分布式锁的技术选型。</p>
+<p>无论是 Redis，ZK，例如 Redis 的 AP 模型会限制很多使用场景，但它却拥有了几者中最高的性能。</p>
+<p>Zookeeper 的分布式锁要比 Redis 可靠很多，但他繁琐的实现机制导致了它的性能不如 Redis，而且 ZK 会随着集群的扩大而性能更加下降。</p>
+<h3 id="2-1-4-总结"><a href="#2-1-4-总结" class="headerlink" title="2.1.4 总结"></a>2.1.4 总结</h3><p>CAP是一个已经被证实的理论：一个分布式系统最多只能同时满足一致性（Consistency）、可用性（Availability）和分区容忍性（Partition tolerance）这三项中的两项。它可以作为我们进行架构设计、技术选型的考量标准。对于多数大型互联网应用的场景，结点众多、部署分散，而且现在的集群规模越来越大，所以节点故障、网络故障是常态，而且要保证服务可用性达到N个9（99.99..%），并要达到良好的响应性能来提高用户体验，因此一般都会做出如下选择：保证P和A，舍弃C强一致，保证最终一致性。</p>
+<p>基于CAP理论，分布式事务必须在AP和CP模式之间进行选择，而A（可靠性）对于在线业务来说又是不可或缺的，所以最后对于分布式事务的处理则演变为现在的AP加数据最终一致性方案。</p>
+<h2 id="2-2-BASE理论-—-AP-方案的补充"><a href="#2-2-BASE理论-—-AP-方案的补充" class="headerlink" title="2.2.BASE理论 — AP 方案的补充"></a>2.2.BASE<strong>理论</strong> — AP 方案的补充</h2><h3 id="2-2-1-理解强一致性和最终一致性"><a href="#2-2-1-理解强一致性和最终一致性" class="headerlink" title="2.2.1 理解强一致性和最终一致性"></a>2.2.1 理解强一致性和最终一致性</h3><p>CAP理论告诉我们一个分布式系统最多只能同时满足一致性（Consistency）、可用性（Availability）和分区容忍性（Partition tolerance）这三项中的两项，其中AP在实际应用中较多，AP即舍弃一致性，保证可用性和分区容忍性，但是在实际生产中很多场景都要实现一致性，比如前边我们举的例子主数据库向从数据库同步数据，即使不要一致性，但是最终也要将数据同步成功来保证数据一致，这种一致性和CAP中的一致性不同，CAP中的一致性要求在任何时间查询每个结点数据都必须一致，它强调的是强一致性，但是最终一致性是允许可以在一段时间内每个结点的数据不一致，但是经过一段时间每个结点的数据必须一致，它强调的是最终数据的一致性。 </p>
+<h3 id="2-2-2-Base理论介绍"><a href="#2-2-2-Base理论介绍" class="headerlink" title="2.2.2 Base理论介绍"></a>2.2.2 Base理论介绍</h3><p>BASE 是 **Basically Available(基本可用)<strong>、</strong>Soft state(软状态)**和 **Eventually consistent (最终一致性)**三个短语的缩写。BASE理论是对CAP中AP的一个扩展，通过牺牲强一致性来获得可用性，当出现故障允许部分不可用但要保证核心功能可用，允许数据在一段时间内是不一致的，但最终达到一致状态。满足BASE理论的事务，我们称之为“柔性事务”。</p>
+<ul>
+<li><strong>Basically Available(基本可用)</strong>:分布式系统在出现故障时，允许损失部分可用功能，保证核心功能可用。如，电商网站交易付款出现问题了，商品依然可以正常浏览。</li>
+<li><strong>Soft state(软状态)</strong>:由于不要求强一致性，所以BASE允许系统中存在中间状态（也叫软状态），这个状态不影响系统可用性，如订单的”支付中”、“数据同步中”等状态，待数据最终一致后状态改为“成功”状态。</li>
+<li><strong>Eventually consistent (最终一致性)</strong>:最终一致是指经过一段时间后，所有节点数据都将会达到一致。如订单的”支付中”状态，最终会变为“支付成功”或者”支付失败”，使订单状态与实际交易结果达成一致，但需要一定时间的延迟、等待。</li>
+</ul>
+<h1 id="3-分布式事务解决方案"><a href="#3-分布式事务解决方案" class="headerlink" title="3.分布式事务解决方案"></a>3.分布式事务解决方案</h1><ul>
+<li>XA/2PC</li>
+<li>TCC</li>
+<li>SAGA</li>
+<li>基于消息的分布式事务</li>
+<li>最大努力通知型分布式事务</li>
+</ul>
+<h2 id="XA-Specification"><a href="#XA-Specification" class="headerlink" title="XA Specification"></a>XA Specification</h2><p>最早的分布式事务产品可能是 AT&amp;T 在 20 世纪 80 年代推出的 Tuxedo (Transactions for Unix, Extended for Distributed Operations)，Tuxedo 最早是为了电信领域的 OLTP 系统研发的分布式事务中间件，后来标准化组织 X/Open 吸收采纳了 Tuxedo 的设计思想和一些接口，推出了分布式事务规范：XA Specification。</p>
+<p>XA 规范中定义了分布式事务处理模型，这个模型中包含四个核心角色：</p>
+<ul>
+<li>RM (Resource Managers)：资源管理器，提供数据资源的操作、管理接口，保证数据的一致性和完整性。最有代表性的就是数据库管理系统，当然有的文件系统、MQ 系统也可以看作 RM。</li>
+<li>TM (Transaction Managers)：事务管理器，是一个协调者的角色，协调跨库事务关联的所有 RM 的行为。</li>
+<li>AP (Application Program)：应用程序，按照业务规则调用 RM 接口来完成对业务模型数据的变更，当数据的变更涉及多个 RM 且要保证事务时，AP 就会通过 TM 来定义事务的边界，TM 负责协调参与事务的各个 RM 一同完成一个全局事务。</li>
+<li>CRMs (Communication Resource Managers)：主要用来进行跨服务的事务的传播。</li>
+</ul>
+<p>下图是 XA 规范中定义的事务模型图，其中：发起分布式事务的 TM 实例称之为 root 节点，其他的 TM 实例可以统称为事务的参与者。事务发起者负责开启整个全局事务，事务参与者各自负责执行自己的事务分支。如果TM实例发起了对其他 TM 实例的服务调用，那么发起者就被成为 Superior，被调用这就被称之为 Subordinate 节点。</p>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328185513.png" alt="image.png"></p>
+<p>XA 规范中分布式事务是构建在 RM 本地事务（此时本地事务被看作分支事务）的基础上的，TM 负责协调这些分支事务要么都成功提交、要么都回滚。XA 规范把分布式事务处理过程划分为两个阶段，所以又叫两阶段提交协议（two phrase commit）：</p>
+<ol>
+<li>预备阶段</li>
+</ol>
+<p>TM 记录事务开始日志，并询问各个 RM 是否可以执行提交准备操作。</p>
+<p>RM 收到指令后，评估自己的状态，尝试执行本地事务的预备操作：预留资源，为资源加锁、执行操作等，但是并不提交事务，并等待 TM 的后续指令。如果尝试失败则告知 TM 本阶段执行失败并且回滚自己的操作，然后不再参与本次事务（以 MySQL 为例，这个阶段会完成资源的加锁，redo log 和 undo log 的写入）。</p>
+<p>TM 收集 RM 的响应，记录事务准备完成日志。</p>
+<ol start="2">
+<li>提交/回滚阶段</li>
+</ol>
+<p>这个阶段根据上个阶段的协调结果发起事务的提交或者回滚操作。</p>
+<p>如果所有 RM 在上一个步骤都返回执行成功，那么：</p>
+<ul>
+<li>TM 记录事务 commit 日志，并向所有 RM 发起事务提交指令。</li>
+<li>RM 收到指令后，提交事务，释放资源，并向 TM 响应“提交完成”。</li>
+<li>如果 TM 收到所有 RM 的响应，则记录事务结束日志。</li>
+</ul>
+<p>如果有 RM 在上一个步骤中返回执行失败或者超时没有应答，则 TM 按照执行失败处理，那么：</p>
+<ul>
+<li>记录事务 abort 日志，向所有 RM 发送事务回滚指令。</li>
+<li>RM 收到指令后，回滚事务，释放资源，并向 TM 响应回滚完成。</li>
+<li>如果 TM 收到所有 RM 的响应，则记录事务结束日志。</li>
+</ul>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328185513.png" alt="image.png"></p>
+<p>针对部分场景，XA 规范还定义了如下优化措施：</p>
+<ul>
+<li>如果 TM 发现整个事务只涉及到一个 RM，那么就会将整个过程退化为一阶段提交。</li>
+<li>如果 RM 收到的 AP 的数据操作是只读操作，那么它可以在阶段 1 就将事务完成并告知 TM 其不再参与阶段 2 的过程。会有脏读的风险。</li>
+<li>如果 RM 在阶段1完成后，长时间等不到阶段 2 的指令，那么其可以自动提交或者回滚本地事务。这叫做 Heuristic Completion，注意这种场景有可能会破坏事务的一致性，产生异常。</li>
+</ul>
+<p>XA 规范中详细定义了各个核心组件之间的交互接口，以 TM 和 RM 的交互接口为例，如下图，一次完整的全局事务，TM 和 RM 之间的交互还是比较频繁的：</p>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328185513.png" alt="image.png"></p>
+<p>事务的执行过程中，宕机和网络超时都有可能发生，针对这些异常场景，不同 XA 规范的实现，对异常处理做法可能不同，可参考如下：</p>
+<ul>
+<li>TM 在阶段 1 中询问 RM 前宕机，恢复后无需做任何操作。</li>
+<li>TM 在阶段 1 中询问 RM 后宕机，可能只有部分 RM 收到了阶段 1 的请求，因此此时需要向 RM 发起回滚请求。</li>
+<li>TM 在阶段 1 中询问 RM 完毕，但是在就准备完成日志时宕机，因不清楚宕机前的事务协商的结果，因此恢复后需要向 RM 发起回滚请求。</li>
+<li>TM 在阶段 1 中记录完毕事务准备完成日志后宕机，恢复后可以根据日志发起提交或者回滚的指令。</li>
+<li>TM 在阶段 2 中记录 commit/abort 日志前宕机，恢复后可以根据日志发起提交或者回滚指令。</li>
+<li>TM 在阶段 2 中记录事务结束日志前宕机，恢复后可以根据日志发起提交或者回滚指令。</li>
+<li>TM 在阶段 2 中记录事务结束日志后宕机，恢复后无需做任何操作。</li>
+<li>阶段 1 中，RM 有超时情况时，TM 按失败处理，给所有 RM 发送回滚指令。</li>
+<li>阶段 2 中，RM 有超时情况是，TM 需要对超时的 RM 持续重复发送指令。</li>
+</ul>
+<h3 id="特点剖析"><a href="#特点剖析" class="headerlink" title="特点剖析"></a><strong>特点剖析</strong></h3><ul>
+<li>XA 两阶段提交协议设计上是要像本地事务一样实现事务的 ACID 四个特性：</li>
+<li>原子性：在 prepare 和 commit 阶段保证事务是原子性的。</li>
+<li>一致性：XA 协议实现的是强一致性。</li>
+<li>隔离性：XA 事务在完成之前一直持有资源的锁，所以可以做到写隔离。</li>
+<li>持久性：基于本地事务实现，所以这一点没有问题。</li>
+</ul>
+<p>XA 是出现最早的分布式事务规范，主流数据库 Oracle、MySQL、SQLServer 等都支持 XA 规范，J2EE 中的 JTA 规范也是参照 XA 规范编写的，与 XA 规范兼容。</p>
+<p>XA 是在资源管理层面实现的分布式事务模型，对业务的入侵度较低。</p>
+<p>XA 两阶段提交协议可以覆盖分布式事务的三种场景，但是全局事务的执行过程中，RM 一直持有资源的锁，如果参与的 RM 过多，尤其是跨服务的场景下，网络通信的次数和时间会急剧变多，所以阻塞的时间更长，系统的吞吐能力变得很差，事务死锁出现的概率也会变大，所以并不适合微服务架构场景中的跨服务的分布式事务模式。</p>
+<p>每一个 TM 域来说，由于 TM 是单点，存在单点故障风险，如果 TM 在阶段1之后挂掉，会导致参与的 RM 长时间收不到阶段 2 的请求而长期持有资源的锁，影响业务的吞吐能力。同时一次完整的全局事务，TM 和 RM 之间的交互多达 8 次，太繁琐，非常影响系统的处理性能。</p>
+<p>XA 两阶段协议可能会造成脑裂的异常，假如 TM 在阶段 2 通知 RM 提交事务时，如果指令发出后就宕机了，而只有部分 RM 收到了提交请求，那么当 TM 恢复的时候，就无法协调本次事务所有的 RM 本地事务的一致性了。</p>
+<p>XA 要处理的异常场景非常多，对框架的实现有一定的挑战，开源的实现，可以参考：Atomikos，Bitronix。</p>
+<blockquote>
+<p>针对 XA 两阶段提交中的问题，有人提出了三阶段提交的改进方案，三阶段提交方案主要解决了单点故障问题，并在 RM 侧也引入了超时机制，以避免资源的长时间锁定。但是三阶段提交方案依然无法避免脑裂的异常情况出现，实际应用案例很少，感兴趣的同学可以自行找相关资料了解。</p>
+</blockquote>
+<h2 id="TCC"><a href="#TCC" class="headerlink" title="TCC"></a>TCC</h2><p>TCC (Try、Commit、Cancel) 是一种补偿型事务，该模型要求应用的每个服务提供 try、confirm、cancel 三个接口，它的核心思想是通过对资源的预留（提供中间态），尽早释放对资源的加锁，如果事务可以提交，则完成对预留资源的确认，如果事务要回滚，则释放预留的资源。</p>
+<p>TCC 也是一种两阶段提交协议，可以看作 2PC/XA 的一种变种，但是不会长时间持有资源锁。</p>
+<p>TCC 模型将事务的提交划分为两个阶段：</p>
+<ol>
+<li>阶段 1</li>
+</ol>
+<p>完成业务检查（一致性）、预留业务资源（准隔离性），即 TCC 中的 try。</p>
+<ol start="2">
+<li>阶段 2</li>
+</ol>
+<p>如果 try 阶段所有业务资源都预留成功，则执行 confirm 操作，否则执行 cancel 操作：</p>
+<ul>
+<li>confirm：不做任何业务检查，仅仅使用预留的资源执行业务操作，如果失败会一直重试。</li>
+<li>cancel：取消执行业务操作，释放预留的资源，如果失败会一直重试。</li>
+</ul>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328185513.png" alt="image.png"></p>
+<p>TCC 模式中，事务的发起者和参与者都需要记录事务日志，事务的发起者需要记录全局事务和各个分支事务的状态和信息；事务的参与者需要记录分支事务的状态。</p>
+<p>TCC 事务在执行过程中的任意环节，均可能发生宕机、重启、网络中断等异常情况，此时事务处于非原子状态和非最终一致状态，此时就需要根据主事务记录和分支事务记录的日志，去完成剩余分支事务的提交或者回滚，使整个分布式事务内所有参展达到最终一致的状态，实现事务的原子性。</p>
+<h3 id="举例"><a href="#举例" class="headerlink" title="举例"></a><strong>举例</strong></h3><p>我们以一个简单的电商系统为例，小明在淘宝上花 100 元买了一本书，获赠 10 个积分，产品上有如下几个操作：</p>
+<ul>
+<li>订单系统创建商品订单</li>
+<li>支付系统接受小明的支付</li>
+<li>库存系统扣减产品库存</li>
+<li>会员系统给小明账户增加会员积分</li>
+</ul>
+<p>这几个动作需要作为一个事务执行，要同时成功或者同时撤销。</p>
+<p>如果采用 TCC 事务模式，那么各个系统需要改造为如下状态：</p>
+<p>1）订单系统</p>
+<ul>
+<li>try：创建一个订单，状态显示为“待支付”</li>
+<li>confirm：更新订单的状态为“已完成”</li>
+<li>cancel：更新订单的状态为“已取消”</li>
+</ul>
+<p>2）支付系统</p>
+<ul>
+<li>try：假设小明账户中有 1000 元，冻结小明账户中的 100 元，此时小明看到的余额依然是 1000 元。</li>
+<li>confirm：将账户余额变为 900 元，并清除冻结记录。</li>
+<li>concel：清除冻结记录。</li>
+</ul>
+<p>3）库存系统</p>
+<ul>
+<li>try：假设库存中还生 10 本书，冻结其中的一本书，现实库存依然有 10 本书。</li>
+<li>confirm：将剩余库存更新为 9 本书，并清除冻结记录。</li>
+<li>cancel：清除冻结记录。</li>
+</ul>
+<p>4）会员系统</p>
+<ul>
+<li>try：假设小明原因积分 3000 分，给小明账户预增加 10 积分，账户显示的积分依然是 3000 分。</li>
+<li>confirm：将账户积分更新为 3010，并清除预增加记录。</li>
+<li>cancel：清除预增加记录。</li>
+</ul>
+<h3 id="特点剖析-1"><a href="#特点剖析-1" class="headerlink" title="特点剖析"></a><strong>特点剖析</strong></h3><p>TCC 事务具备事务的四个特性：</p>
+<ul>
+<li>原子性：事务发起方协调各个分支事务全部提交或者全部回滚。</li>
+<li>一致性：TCC 事务提供最终一致性。</li>
+<li>隔离型：通过 try 预分配资源的方式来实现数据的隔离。</li>
+<li>持久性：交由各个分支事务来实现。</li>
+</ul>
+<p>TCC 事务模型对业务方侵入较大，需要业务方把功能的实现上由一个接口拆分为三个，开发成本较高。</p>
+<p>同时 TCC 事务为了解决异步网络中的通信失败或超时带来的异常情况，要求业务方在设计实现上要遵循三个策略：</p>
+<ul>
+<li>允许空回滚：原因是异常发生在阶段 1 时，部分参与方没有收到 try 请求从而触发整个事务的 cancel 操作，try 失败或者没有执行 try 操作的参与方收到 cancel 请求时，要进行空回滚操作。</li>
+<li>保持幂等性：原因是异常发生在阶段 2 时，比如网络超时，则会重复调用参与方的 confirm/cancel 方法，因此需要这两个方法实现上保证幂等性。</li>
+<li>防止资源悬挂：原因网络异常导致两个阶段无法保证严格的顺序执行，出现参与方侧 try 请求比 cancel 请求更晚到达的情况，cancel 会执行空回滚而确保事务的正确性，但是此时 try 方法也不可以再被执行。</li>
+</ul>
+<p>TCC 事务将分布式事务从资源层提到业务层来实现，可以让业务灵活选择资源的锁定粒度，并且全局事务执行过程中不会一直持有锁，所以系统的吞吐量比 2PC/XA 模式要高很多。</p>
+<blockquote>
+<p>支持 TCC 事务的开源框架有：ByteTCC、Himly、TCC-transaction。</p>
+</blockquote>
+<h2 id="Saga"><a href="#Saga" class="headerlink" title="Saga"></a>Saga</h2><p>Saga 并不是一个新概念，其相关论文在 1987 年就发布了，和 XA 两阶段提交规范出现的时间差不多。</p>
+<p>Saga 和 TCC 一样，也是一种补偿事务，但是它没有 try 阶段，而是把分布式事务看作一组本地事务构成的事务链。</p>
+<p>事务链中的每一个正向事务操作，都对应一个可逆的事务操作。Saga 事务协调器负责按照顺序执行事务链中的分支事务，分支事务执行完毕，即释放资源。如果某个分支事务失败了，则按照反方向执行事务补偿操作。</p>
+<p>假如一个 Saga 的分布式事务链有 n 个分支事务构成，[T1,T2,…,Tn]，那么该分布式事务的执行情况有三种：</p>
+<ul>
+<li>T1,T2,…,Tn：n 个事务全部执行成功了。</li>
+<li>T1,T2,…,Ti,Ci,…,C2,C1：执行到第 i (i&lt;=n) 个事务的时候失败了，则按照 i-&gt;1 的顺序依次调用补偿操作。如果补偿失败了，就一直重试。补偿操作可以优化为并行执行。</li>
+<li>T1,T2,…,Ti (失败),Ti (重试),Ti (重试),…,Tn：适用于事务必须成功的场景，如果发生失败了就一直重试，不会执行补偿操作。</li>
+</ul>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328185831.png" alt="image.png"></p>
+<h3 id="举例-1"><a href="#举例-1" class="headerlink" title="举例"></a><strong>举例</strong></h3><p>假如国庆节小明要出去玩，从北京出发，先去伦敦，在伦敦游玩三天，再去巴黎，在巴黎游玩三天，然后再返回北京。整个行程中涉及不同航空公司的机票预订以及伦敦和巴黎当地的酒店预订，小明的计划是如果任何一张机票或酒店预订不上，就取消本次出行计划。假如综合旅游出行服务平台提供这种一键下单的功能，那么这就是一个长事务，用 Saga 模式编排服务的话，就如下图所示：任何一个环节失败的话，就通过补偿操作取消前面的行程预订。</p>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328185831.png" alt="image.png"></p>
+<h3 id="特点剖析-2"><a href="#特点剖析-2" class="headerlink" title="特点剖析"></a><strong>特点剖析</strong></h3><p>Saga 事务是可以保障事务的三个特性：</p>
+<ul>
+<li>原子性：Saga 协调器可以协调事务链中的本地事务要么全部提交，要么全部回滚。</li>
+<li>一致性：Saga 事务可以实现最终一致性。</li>
+<li>持久性：基于本地事务，所以这个特性可以很好实现。</li>
+</ul>
+<p>但是 Saga 不保证事务隔离性的，本地事务提交后变更就对其他事务可见了。其他事务如果更改了已经提交成功的数据，可能会导致补偿操作失败。比如扣款失败，但是钱已经花掉了，业务设计上需要考虑这种场景并从业务设计上规避这种问题。</p>
+<p>Saga 事务和 TCC 事务一样，对业务实现要求高，要求业务设计实现上遵循三个策略：</p>
+<ul>
+<li>允许空补偿：网络异常导致事务的参与方只收到了补偿操作指令，因为没有执行过正常操作，因此要进行空补偿。</li>
+<li>保持幂等性：事务的正向操作和补偿操作都可能被重复触发，因此要保证操作的幂等性。</li>
+<li>防止资源悬挂：网络异常导致事务的正向操作指令晚于补偿操作指令到达，则要丢弃本次正常操作，否则会出现资源悬挂问题。</li>
+</ul>
+<p>虽然 Saga 和 TCC 都是补偿事务，但是由于提交阶段不同，所以两者也是有不同的：</p>
+<ul>
+<li>Saga 是不完美补偿，补偿操作会留下之前原始事务操作的痕迹，需要考虑对业务上的影响。</li>
+<li>TCC 是完美补偿，补偿操作会彻底清理之前的原始事务操作，用户是感知不到事务取消之前的状态信息的。</li>
+<li>TCC 的事务可以更好的支持异步化，但是 Saga 模式一般在补偿阶段比较适合异步化。</li>
+</ul>
+<p>Saga 模式非常适合于业务流程长的长事务的场景，实现上对业务侵入低，所以非常适合微服务架构的场景。同时 Saga 采用的是一阶段提交模式，不会对资源长时间加锁，不存在“木桶效应”，所以采用这种模式架构的系统性能高、吞吐高。</p>
+<p>阿里巴巴的 Seata 开源项目和华为的 ServiceComb 开源项目都支持 Saga 模式。</p>
+<h2 id="基于消息的分布式事务"><a href="#基于消息的分布式事务" class="headerlink" title="基于消息的分布式事务"></a>基于消息的分布式事务</h2><p>基于消息的分布式事务模式核心思想是通过消息系统来通知其他事务参与方自己事务的执行状态。</p>
+<p>消息系统的引入更有效的将事务参与方解耦，各个参与方可以异步执行。</p>
+<p>该种模式的难点在于解决本地事务执行和消息发送的一致性：两者要同时执行成功或者同时取消执行。</p>
+<p>实现上主要有两种方式：</p>
+<ul>
+<li>基于事务消息的方案</li>
+<li>基于本地消息的方案</li>
+</ul>
+<h3 id="基于事务消息的分布式事务"><a href="#基于事务消息的分布式事务" class="headerlink" title="基于事务消息的分布式事务"></a><strong>基于事务消息的分布式事务</strong></h3><p>普通消息是无法解决本地事务执行和消息发送的一致性问题的。因为消息发送是一个网络通信的过程，发送消息的过程就有可能出现发送失败、或者超时的情况。超时有可能发送成功了，有可能发送失败了，消息的发送方是无法确定的，所以此时消息发送方无论是提交事务还是回滚事务，都有可能不一致性出现。</p>
+<p>解决这个问题，需要引入事务消息，事务消息和普通消息的区别在于事务消息发送成功后，处于 prepared 状态，不能被订阅者消费，等到事务消息的状态更改为可消费状态后，下游订阅者才可以监听到次消息。</p>
+<p>本地事务和事务消息的发送的处理流程如下：</p>
+<ul>
+<li>事务发起者预先发送一个事务消息。</li>
+<li>MQ 系统收到事务消息后，将消息持久化，消息的状态是“待发送”，并给发送者一个 ACK 消息。</li>
+<li>事务发起者如果没有收到 ACK 消息，则取消本地事务的执行；如果收到了 ACK 消息，则执行本地事务，并给 MQ 系统再发送一个消息，通知本地事务的执行情况。</li>
+<li>MQ 系统收到消息通知后，根据本地事务的执行情况更改事务消息的状态，如果成功执行，则将消息更改为“可消费”并择机下发给订阅者；如果事务执行失败，则删除该事务消息。</li>
+<li>本地事务执行完毕后，发给 MQ 的通知消息有可能丢失了。所以支持事务消息的 MQ 系统有一个定时扫描逻辑，扫描出状态仍然是“待发送”状态的消息，并向消息的发送方发起询问，询问这条事务消息的最终状态如何并根据结果更新事务消息的状态。因此事务的发起方需要给 MQ 系统提供一个事务消息状态查询接口。</li>
+<li>如果事务消息的状态是“可发送”，则 MQ 系统向下游参与者推送消息，推送失败会不停重试。</li>
+<li>下游参与者收到消息后，执行本地事务，本地事务如果执行成功，则给 MQ 系统发送 ACK 消息；如果执行失败，则不发送 ACK 消息，MQ 系统会持续推送给消息。</li>
+</ul>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328185831.png" alt="image.png"></p>
+<h3 id="基于本地消息的分布式事务"><a href="#基于本地消息的分布式事务" class="headerlink" title="基于本地消息的分布式事务"></a><strong>基于本地消息的分布式事务</strong></h3><p>基于事务消息的模式对 MQ 系统要求较高，并不是所有 MQ 系统都支持事务消息的，RocketMQ 是目前为数不多的支持事务小的 MQ 系统。如果所依赖的 MQ 系统不支持事务消息，那么可以采用本地消息的分布式模式。</p>
+<p>该种模式的核心思想是事务的发起方维护一个本地消息表，业务执行和本地消息表的执行处在同一个本地事务中。业务执行成功，则同时记录一条“待发送”状态的消息到本地消息表中。系统中启动一个定时任务定时扫描本地消息表中状态为“待发送”的记录，并将其发送到 MQ 系统中，如果发送失败或者超时，则一直发送，知道发送成功后，从本地消息表中删除该记录。后续的消费订阅流程则与基于事务消息的模式雷同。</p>
+<p><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328185831.png" alt="image.png"></p>
+<h3 id="特点剖析-3"><a href="#特点剖析-3" class="headerlink" title="特点剖析"></a><strong>特点剖析</strong></h3><p>基于消息的分布式事务模式对 ACID 特性的支持如下：</p>
+<ul>
+<li>原子性：最终可以实现分支事务都执行或者都不执行。</li>
+<li>一致性：提供最终一致性。</li>
+<li>隔离性：不保障隔离性。</li>
+<li>持久性：由本地事务来保证。</li>
+</ul>
+<p>基于消息的分布式事务可以将分布式系统之间更有效的解耦，各个事务参与方之间的调用不再是同步调用。</p>
+<p>对 MQ 系统的要求较高，对业务实现也有一定的侵入性，要么提供事务消息状态查询接口，要么需要维护本地消息表。并且原则上只接受下游分支事务的成功，不接受事务的回滚，如果失败就要一直重试，适用于对最终一致性敏感度较低的业务场景，例如跨企业的系统间的调用，适用的场景有限。</p>
+<h2 id="最大努力通知型分布式事务"><a href="#最大努力通知型分布式事务" class="headerlink" title="最大努力通知型分布式事务"></a>最大努力通知型分布式事务</h2><p>最大努力通知型的分布式事务解决方案，也是基于 MQ 系统的一种解决方案，但是不要求 MQ 消息可靠。</p>
+<h3 id="举例-2"><a href="#举例-2" class="headerlink" title="举例"></a><strong>举例</strong></h3><p>假设小明通过联通的网上营业厅为手机充话费，充值方式选择支付宝支付。整个操作的流程如下：</p>
+<ul>
+<li>小明选择充值金额“50 元”，支付方式“支付宝”。</li>
+<li>联通网上营业厅创建一个充值订单，状态为“支付中”，并跳转到支付宝的支付页面（此时进入了支付宝的系统中）。</li>
+<li>支付宝验明确认小明的支付后，从小明的账户中扣除 50 元，并向联通的账户中增加 50 元。执行完毕后向 MQ 系统发送一条消息，消息的内容标识支付是否成功，消息发送允许失败。</li>
+<li>如果消息发送成功，那么支付宝的通知服务会订阅到该消息，并调用联通的接口通知本次支付的结果。如果此时联通的服务挂掉了，导致通知失败了，则会按照 5min、10min、30min、1h、…、24h 等递增的时间间隔，间隔性重复调用联通的接口，直到调用成功或者达到预订的时间窗口上限后，则不再通知。这就是尽最大努力通知的含义。</li>
+<li>如果联通服务恢复正常，收到了支付宝的通知，如果支付成功，则给账户充值；如果支付失败，则取消充值。执行完毕后给支付宝通知服务确认响应，确认响应允许失败，支付宝系统会继续重试。所以联通的充值接口需要保持幂等性。</li>
+<li>如果联通服务故障时间很久，恢复正常后，已超出支付宝通知服务的时间窗口，则联通扫描“支付中”的订单，主动向支付宝发起请求，核验订单的支付结果。</li>
+</ul>
+<h3 id="特点剖析-4"><a href="#特点剖析-4" class="headerlink" title="特点剖析"></a><strong>特点剖析</strong></h3><p>最大努力通知型方案本质是通过引入定期校验机制来对最终一致性做兜底，对业务侵入性较低、对 MQ 系统要求较低，实现比较简单，适合于对最终一致性敏感度比较低、业务链路较短的场景，比如跨平台、跨企业的系统间的业务交互。</p>
+<h1 id="4-分布式事务中间件"><a href="#4-分布式事务中间件" class="headerlink" title="4. 分布式事务中间件"></a>4. 分布式事务中间件</h1><h2 id="Seata"><a href="#Seata" class="headerlink" title="Seata"></a>Seata</h2><p>seata 是阿里开源的，阿里是国内最早一批进行应用分布式（微服务化）改造的企业，所以很早就遇到微服务架构下的分布式事务问题。阿里对于分布式事务的解决方案历程如下：</p>
+<ul>
+<li>2014 年，阿里中间件团队发布 <strong>TXC（Taobao Transaction Constructor）</strong>，为集团内应用提供分布式事务服务。</li>
+<li>2016 年，TXC 经过产品化改造，以 <strong>GTS（Global Transaction Service）</strong> 的身份登陆阿里云，成为当时业界唯一一款云上分布式事务产品，在阿云里的公有云、专有云解决方案中，开始服务于众多外部客户。</li>
+<li>2019 年起，基于 TXC 和 GTS 的技术积累，阿里中间件团队发起了开源项目 <strong>Fescar（Fast &amp; EaSy Commit And Rollback, FESCAR）</strong>，和社区一起建设这个分布式事务解决方案。</li>
+<li>2019 - fescar被重命名为了<strong>seata</strong>（simple extensiable autonomous transaction architecture）。</li>
+</ul>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ol>
+<li>《神一样的CAP理论被应用在何方》-<a target="_blank" rel="noopener" href="https://developer.51cto.com/art/201909/602506.htm">https://developer.51cto.com/art/201909/602506.htm</a></li>
+<li>《如何选择分布式事务解决方案？》 - <a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/762770">https://developer.aliyun.com/article/762770</a></li>
+<li>《分布式事务中间件TXC》（<a target="_blank" rel="noopener" href="http://mw.alibaba-inc.com/product-txc.html%EF%BC%89">http://mw.alibaba-inc.com/product-txc.html）</a></li>
+<li>《弹力设计之补偿事务》（<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/8095001d79bb%EF%BC%89">https://www.jianshu.com/p/8095001d79bb）</a></li>
+<li>《分布式事务中间件ServiceComb》（<a target="_blank" rel="noopener" href="http://servicecomb.apache.org/cn/docs/distributed-transactions-saga-implementation/%EF%BC%89">http://servicecomb.apache.org/cn/docs/distributed-transactions-saga-implementation/）</a></li>
+<li>《深入理解两阶段提交》（<a target="_blank" rel="noopener" href="https://sq.163yun.com/blog/article/165554812476866560%EF%BC%89">https://sq.163yun.com/blog/article/165554812476866560）</a></li>
+<li>《Seata》（<a target="_blank" rel="noopener" href="https://seata.io/zh-cn/%EF%BC%89">https://seata.io/zh-cn/）</a></li>
+<li>《TCC事务原理》（<a target="_blank" rel="noopener" href="https://www.cnblogs.com/jajian/p/10014145.html%EF%BC%89">https://www.cnblogs.com/jajian/p/10014145.html）</a></li>
+<li>《TCC事务异常场景》（<a target="_blank" rel="noopener" href="https://blog.csdn.net/dm_vincent/article/details/92432059">https://blog.csdn.net/dm_vincent/article/details/92432059</a></li>
+<li>《Compensating Transaction Pattern》（<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction%EF%BC%89">https://docs.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction）</a></li>
+<li>《基于消息的分布式事务》（<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/04bad986a4a2%EF%BC%89">https://www.jianshu.com/p/04bad986a4a2）</a></li>
+<li>《分布式事务概述》（<a target="_blank" rel="noopener" href="http://www.tianshouzhi.com/api/tutorials/distributed_transaction/383%EF%BC%89">http://www.tianshouzhi.com/api/tutorials/distributed_transaction/383）</a></li>
+<li>《初识Open/X XA》（<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/6c1fd2420274%EF%BC%89">https://www.jianshu.com/p/6c1fd2420274）</a></li>
+<li>《DTP: XA Specification》（<a target="_blank" rel="noopener" href="https://pubs.opengroup.org/onlinepubs/009680699/toc.pdf%EF%BC%89">https://pubs.opengroup.org/onlinepubs/009680699/toc.pdf）</a></li>
+<li>《DTP Model》（<a target="_blank" rel="noopener" href="https://pubs.opengroup.org/onlinepubs/009249599/toc.pdf%EF%BC%89">https://pubs.opengroup.org/onlinepubs/009249599/toc.pdf）</a></li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">NicZSAMA</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://gakkisama.com/2021/03/09/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">http://gakkisama.com/2021/03/09/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://gakkisama.com" target="_blank">o.0</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328211839.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/02/26/%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95/"><img class="next-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info"></div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">NicZSAMA</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text">1.基础概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%8B%E5%8A%A1"><span class="toc-number">1.1.</span> <span class="toc-text">1.1.什么是事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E6%9C%AC%E5%9C%B0%E4%BA%8B%E5%8A%A1"><span class="toc-number">1.2.</span> <span class="toc-text">1.2.本地事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1"><span class="toc-number">1.3.</span> <span class="toc-text">1.3.分布式事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E4%BA%A7%E7%94%9F%E7%9A%84%E5%9C%BA%E6%99%AF"><span class="toc-number">1.4.</span> <span class="toc-text">1.4 分布式事务产生的场景</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA"><span class="toc-number">2.</span> <span class="toc-text">2.分布式事务基础理论</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-CAP%E7%90%86%E8%AE%BA"><span class="toc-number">2.1.</span> <span class="toc-text">2.1.CAP理论</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1-%E7%90%86%E8%A7%A3CAP"><span class="toc-number">2.1.1.</span> <span class="toc-text">2.1.1.理解CAP</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#C-Consistency%EF%BC%9A"><span class="toc-number">2.1.1.1.</span> <span class="toc-text">C - Consistency：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#A-Availability-%EF%BC%9A"><span class="toc-number">2.1.1.2.</span> <span class="toc-text">A - Availability ：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#P-Partition-tolerance-%EF%BC%9A"><span class="toc-number">2.1.1.3.</span> <span class="toc-text">P - Partition tolerance ：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-2-CAP%E7%BB%84%E5%90%88%E6%96%B9%E5%BC%8F"><span class="toc-number">2.1.2.</span> <span class="toc-text">2.1.2.CAP组合方式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%90%8C%E6%97%B6%E5%85%B7%E5%A4%87-CAP%EF%BC%9F"><span class="toc-number">2.1.2.1.</span> <span class="toc-text">同时具备 CAP？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#CAP%E7%9A%84%E7%BB%84%E5%90%88%E6%96%B9%E5%BC%8F"><span class="toc-number">2.1.2.2.</span> <span class="toc-text">CAP的组合方式</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-3-CAP-%E5%9C%A8%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E4%B8%AD"><span class="toc-number">2.1.3.</span> <span class="toc-text">2.1.3 CAP 在实际应用中</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-3-1-%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%EF%BC%8C%E9%80%89%E6%8B%A9-CP-%E8%BF%98%E6%98%AF-AP%EF%BC%9F"><span class="toc-number">2.1.3.1.</span> <span class="toc-text">2.1.3.1 注册中心，选择 CP 还是 AP？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-3-2-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%EF%BC%8C%E6%98%AF%E9%80%89%E6%8B%A9-CA-%E8%BF%98%E6%98%AF%E9%80%89%E6%8B%A9-CP"><span class="toc-number">2.1.3.2.</span> <span class="toc-text">2.1.3.2 分布式锁，是选择 CA 还是选择 CP?</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-4-%E6%80%BB%E7%BB%93"><span class="toc-number">2.1.4.</span> <span class="toc-text">2.1.4 总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-BASE%E7%90%86%E8%AE%BA-%E2%80%94-AP-%E6%96%B9%E6%A1%88%E7%9A%84%E8%A1%A5%E5%85%85"><span class="toc-number">2.2.</span> <span class="toc-text">2.2.BASE理论 — AP 方案的补充</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-1-%E7%90%86%E8%A7%A3%E5%BC%BA%E4%B8%80%E8%87%B4%E6%80%A7%E5%92%8C%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">2.2.1.</span> <span class="toc-text">2.2.1 理解强一致性和最终一致性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-2-Base%E7%90%86%E8%AE%BA%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.2.2.</span> <span class="toc-text">2.2.2 Base理论介绍</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">3.</span> <span class="toc-text">3.分布式事务解决方案</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#XA-Specification"><span class="toc-number">3.1.</span> <span class="toc-text">XA Specification</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%89%96%E6%9E%90"><span class="toc-number">3.1.1.</span> <span class="toc-text">特点剖析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#TCC"><span class="toc-number">3.2.</span> <span class="toc-text">TCC</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BE%E4%BE%8B"><span class="toc-number">3.2.1.</span> <span class="toc-text">举例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%89%96%E6%9E%90-1"><span class="toc-number">3.2.2.</span> <span class="toc-text">特点剖析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Saga"><span class="toc-number">3.3.</span> <span class="toc-text">Saga</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BE%E4%BE%8B-1"><span class="toc-number">3.3.1.</span> <span class="toc-text">举例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%89%96%E6%9E%90-2"><span class="toc-number">3.3.2.</span> <span class="toc-text">特点剖析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E6%B6%88%E6%81%AF%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1"><span class="toc-number">3.4.</span> <span class="toc-text">基于消息的分布式事务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1"><span class="toc-number">3.4.1.</span> <span class="toc-text">基于事务消息的分布式事务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E6%9C%AC%E5%9C%B0%E6%B6%88%E6%81%AF%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1"><span class="toc-number">3.4.2.</span> <span class="toc-text">基于本地消息的分布式事务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%89%96%E6%9E%90-3"><span class="toc-number">3.4.3.</span> <span class="toc-text">特点剖析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%A4%A7%E5%8A%AA%E5%8A%9B%E9%80%9A%E7%9F%A5%E5%9E%8B%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1"><span class="toc-number">3.5.</span> <span class="toc-text">最大努力通知型分布式事务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BE%E4%BE%8B-2"><span class="toc-number">3.5.1.</span> <span class="toc-text">举例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%89%96%E6%9E%90-4"><span class="toc-number">3.5.2.</span> <span class="toc-text">特点剖析</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E4%B8%AD%E9%97%B4%E4%BB%B6"><span class="toc-number">4.</span> <span class="toc-text">4. 分布式事务中间件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Seata"><span class="toc-number">4.1.</span> <span class="toc-text">Seata</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">5.</span> <span class="toc-text">参考资料</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/03/09/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" title="分布式事务及解决方案"><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328211839.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="分布式事务及解决方案"/></a><div class="content"><a class="title" href="/2021/03/09/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" title="分布式事务及解决方案">分布式事务及解决方案</a><time datetime="2021-03-09T04:55:29.576Z" title="发表于 2021-03-09 12:55:29">2021-03-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/26/%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95/" title="无题"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2021/02/26/%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95/" title="无题">无题</a><time datetime="2021-02-26T04:12:48.622Z" title="发表于 2021-02-26 12:12:48">2021-02-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/09/Jsoup%E5%A4%84%E7%90%86XSS%E6%94%BB%E5%87%BB/" title="Jsoup"><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20200728142021.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Jsoup"/></a><div class="content"><a class="title" href="/2020/12/09/Jsoup%E5%A4%84%E7%90%86XSS%E6%94%BB%E5%87%BB/" title="Jsoup">Jsoup</a><time datetime="2020-12-09T04:57:11.708Z" title="发表于 2020-12-09 12:57:11">2020-12-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/07/29/Java%208%20%E6%97%A5%E6%9C%9F%E5%A4%84%E7%90%86%20/" title="Java 8 中的日期处理"><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20200728142021.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Java 8 中的日期处理"/></a><div class="content"><a class="title" href="/2020/07/29/Java%208%20%E6%97%A5%E6%9C%9F%E5%A4%84%E7%90%86%20/" title="Java 8 中的日期处理">Java 8 中的日期处理</a><time datetime="2020-07-29T02:52:58.638Z" title="发表于 2020-07-29 10:52:58">2020-07-29</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/07/27/Java%20%E9%9B%86%E5%90%88/" title="Java 集合"><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20200728142021.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Java 集合"/></a><div class="content"><a class="title" href="/2020/07/27/Java%20%E9%9B%86%E5%90%88/" title="Java 集合">Java 集合</a><time datetime="2020-07-27T15:40:42.539Z" title="发表于 2020-07-27 23:40:42">2020-07-27</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By NicZSAMA</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
