@@ -1,0 +1,176 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>o.0 | o.0</title><meta name="author" content="NicZSAMA"><meta name="copyright" content="NicZSAMA"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="主要功能：  服务注册  服务续约  服务同步  服务列表获取  在 服务启动时初始化 DiscoveryClient 类，会实例化一个线程池，两个核心线程分别是心跳续约和更新服务列表。 该线程是默认延迟 30 秒执行，并且判断是否超时，如果遇到执行任务超时，则扩大为原来间隔时间的两倍，一直到延时时间的阈值。一旦新任务不再超时，间隔时间又恢复为初始值。如服务列表获取任务默认为每隔30秒执行，随着执">
+<meta property="og:type" content="article">
+<meta property="og:title" content="o.0">
+<meta property="og:url" content="http://gakkisama.com/2021/08/21/Eureka/index.html">
+<meta property="og:site_name" content="o.0">
+<meta property="og:description" content="主要功能：  服务注册  服务续约  服务同步  服务列表获取  在 服务启动时初始化 DiscoveryClient 类，会实例化一个线程池，两个核心线程分别是心跳续约和更新服务列表。 该线程是默认延迟 30 秒执行，并且判断是否超时，如果遇到执行任务超时，则扩大为原来间隔时间的两倍，一直到延时时间的阈值。一旦新任务不再超时，间隔时间又恢复为初始值。如服务列表获取任务默认为每隔30秒执行，随着执">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2021-08-21T01:13:11.430Z">
+<meta property="article:modified_time" content="2021-08-23T06:59:41.628Z">
+<meta property="article:author" content="NicZSAMA">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://gakkisama.com/2021/08/21/Eureka/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2021-08-23 14:59:41'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210814135458.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">18</div></a></div></div></div><hr/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">o.0</a></span><div id="menus"><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">无题</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-08-21T01:13:11.430Z" title="发表于 2021-08-21 09:13:11">2021-08-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-08-23T06:59:41.628Z" title="更新于 2021-08-23 14:59:41">2021-08-23</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>主要功能：</p>
+<ol>
+<li><p>服务注册</p>
+</li>
+<li><p>服务续约</p>
+</li>
+<li><p>服务同步</p>
+</li>
+<li><p>服务列表获取</p>
+<ol>
+<li>在 服务启动时初始化 DiscoveryClient 类，会实例化一个线程池，两个核心线程分别是心跳续约和更新服务列表。</li>
+<li>该线程是默认延迟 30 秒执行，并且判断是否超时，如果遇到执行任务超时，则扩大为原来间隔时间的两倍，一直到延时时间的阈值。一旦新任务不再超时，间隔时间又恢复为初始值。<em>如服务列表获取任务默认为每隔30秒执行，随着执行时间超时扩大为原来的2倍再执行，直到到达阈值。如果执行未超时，则设置为原来的间隔时间执行</em></li>
+<li>eueka不是每次都是采用全量获取服务列表，而是默认采用增量方式，获取变化的实例。<br> 当然为保证获取到的服务列表是最新的，获取增量的同时，eureka服务端也会把最新的服务列表hashcode返回，客户端将此hashcode与更新后的本地缓存hashcode作对比，如果不相同，则重新进行全量获取。</li>
+</ol>
+</li>
+<li><p>远程调用</p>
+</li>
+<li><p>服务下线</p>
+</li>
+<li><p>服务剔除</p>
+</li>
+<li><p>自我保护</p>
+</li>
+</ol>
+<ol>
+<li>server 启动 ，集群同步</li>
+<li>client 启动 心跳、如果404 注册新服务。增量拉取、服务端接收心跳，更新时间。</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://github.com/Netflix/eureka/wiki/Eureka-REST-operations">https://github.com/Netflix/eureka/wiki/Eureka-REST-operations</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1340424">https://cloud.tencent.com/developer/article/1340424</a> 源码</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_41947378/article/details/109135506">https://blog.csdn.net/weixin_41947378/article/details/109135506</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.deepinblog.com/spring/175/">https://www.deepinblog.com/spring/175/</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/LO_YUN/article/details/107067869">https://blog.csdn.net/LO_YUN/article/details/107067869</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/LO_YUN/article/details/107388561">https://blog.csdn.net/LO_YUN/article/details/107388561</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/rickiyang/p/11802413.html">https://www.cnblogs.com/rickiyang/p/11802413.html</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">NicZSAMA</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://gakkisama.com/2021/08/21/Eureka/">http://gakkisama.com/2021/08/21/Eureka/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://gakkisama.com" target="_blank">o.0</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/04/30/%E4%BA%92%E8%81%94%E7%BD%91%E9%BB%91%E8%AF%9D/"><img class="next-cover" src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210814122555.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">互联网黑话手册</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210814135458.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">NicZSAMA</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">18</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/08/21/Eureka/" title="无题"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2021/08/21/Eureka/" title="无题">无题</a><time datetime="2021-08-21T01:13:11.430Z" title="发表于 2021-08-21 09:13:11">2021-08-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/04/30/%E4%BA%92%E8%81%94%E7%BD%91%E9%BB%91%E8%AF%9D/" title="互联网黑话手册"><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210814122555.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="互联网黑话手册"/></a><div class="content"><a class="title" href="/2021/04/30/%E4%BA%92%E8%81%94%E7%BD%91%E9%BB%91%E8%AF%9D/" title="互联网黑话手册">互联网黑话手册</a><time datetime="2021-04-30T01:54:40.159Z" title="发表于 2021-04-30 09:54:40">2021-04-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/09/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" title="分布式事务及解决方案"><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210328211839.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="分布式事务及解决方案"/></a><div class="content"><a class="title" href="/2021/03/09/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" title="分布式事务及解决方案">分布式事务及解决方案</a><time datetime="2021-03-09T04:55:29.576Z" title="发表于 2021-03-09 12:55:29">2021-03-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/26/%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95/" title="加密算法"><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20210330122645.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="加密算法"/></a><div class="content"><a class="title" href="/2021/02/26/%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95/" title="加密算法">加密算法</a><time datetime="2021-02-26T04:12:48.622Z" title="发表于 2021-02-26 12:12:48">2021-02-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/09/Jsoup%E5%A4%84%E7%90%86XSS%E6%94%BB%E5%87%BB/" title="Jsoup"><img src="https://nicspichost.oss-cn-beijing.aliyuncs.com/blog/20200728142021.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Jsoup"/></a><div class="content"><a class="title" href="/2020/12/09/Jsoup%E5%A4%84%E7%90%86XSS%E6%94%BB%E5%87%BB/" title="Jsoup">Jsoup</a><time datetime="2020-12-09T04:57:11.708Z" title="发表于 2020-12-09 12:57:11">2020-12-09</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By NicZSAMA</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
